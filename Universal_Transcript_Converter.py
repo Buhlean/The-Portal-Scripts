@@ -3,6 +3,7 @@
 ## This script parses VTT and Descript/Otter txt files
 ## into machine-readable vtt, srt and markup files.
 ## Please set the parameters in the section at the top to suit your needs.
+## If the episode is older than EP 31, the length is known to the script automatically.
 ##
 ###############################################################################################################################################################################################
 
