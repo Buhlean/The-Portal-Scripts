@@ -1,12 +1,13 @@
 ###############################################################################################################################################################################################
 ## Change these to the desired values and Run the script.
-## FILEPATH is relative to the script or absolute, your choice.
+## FILEPATH is relative to the script   ( '\\EP21\\' )
+## or absolute, your choice.            ( 'C:\\podcasts\\EP21\\' )
 ###############################################################################################################################################################################################
 
-FILEPATH = 'C:\\Users\\Alex\\Documents\\Python Projects\\PORTAL\EP21\\'
+FILEPATH = 'EP21\\'
 FILENAME = 'Ep_21_art19.vtt'
 
-## Format: 'hh:mm:ss --> hh:mm:ss' (as many times a s needed, seperated by comma)
+## Format: 'hh:mm:ss --> hh:mm:ss' (as many times as needed, seperated by comma)
 ## Example: AD_OCCURRENCES = ['00:00:00 --> 00:05:00', '01:55:00 --> 01:57:36']
 AD_OCCURRENCES = ['00:00:00 --> 00:05:00', '01:55:00 --> 01:57:36']
 
@@ -22,24 +23,24 @@ def parse_vtt(rawtext, ad_times):
     content = ''
 
     rawtext = rawtext.split('WEBVTT', 1)[1].strip() # remove everything above the first actual line 
-    for block in rawtext.split('\n\n'): # specification says two newline between each block. very handy!
-        note = False
-        content = ''
+    for block in rawtext.split('\n\n'): # specification says: two newline between each block. very handy!
+        note = False # reset after every run
+        content = '' # --
         for line in block.split('\n'):
             if 'NOTE' in line: # found a comment
                 note = True
                 continue
             if not note and '-->' in line: # we are expecting a timestamp here, always contains -->
-                time = line.strip() # there might be whitespace, meaning a wrench in my functions. gets rid of it
+                time = line.strip() # there might be whitespace, a wrench in my functions' gears. this gets rid of it
                 continue # no additional content here
             content = ''.join((content, line)) # additional spoken words for the current timestamp
         if len(time) > 20:
-            its_an_ad, time = adjust_time(time, ad_times)
+            its_an_ad, time = adjust_time(time, ad_times) ## this is the juicy bit, see function below
             if its_an_ad:
-                note = True
+                note = True # rem it out. we don't want to delete it, maybe we need it later
                 content = ';'.join((time, content))
         if note: # it's a comment/NOTE
-            tokens.append(list((0, '', '', content))) # 0 means NOTE, will be decoded in the save_as_vtte method
+            tokens.append(list((0, '', '', content))) # 0 means NOTE, will be decoded in the save_as_vtt method
         else: # not a NOTE, actual cue
             if '<v' in content[:3]: # already tagged
                 tokens.append(list((1, currentspeaker, time, content)))
@@ -55,7 +56,11 @@ def save_as_vtt(tokens):
         filename = ''.join((name, '_without_ads.', ext))
     if ACTION == 'INSERT':
         filename = ''.join((name, '_added_ads.', ext))
-    with open(FILEPATH+filename, 'w') as file:
+    if FILEPATH[-1:] == '\\':
+        filepath = FILEPATH
+    else:
+        filepath = ''.join((FILEPATH, '\\'))
+    with open(''.join((filepath, filename)), 'w') as file:
         file.write('\nWEBVTT\n\n')
         for token in tokens:
             if token[0] == 0:
@@ -72,14 +77,14 @@ def adjust_time(time, ad_times):
     end   = deconstruct_and_convert(stamps[1])
     for ad_start, ad_end, duration in ad_times: # given as parameter calculated from the user defined constant at the top of the file
         if ACTION == 'REMOVE':
-            if start >= ad_start and end <= ad_end: # it's an ad, send emssage to rem it out
+            if start >= ad_start and end <= ad_end: # it's an ad, send message to rem it out
                 found_an_ad = True
                 break
-            elif start >= ad_end: # we are after an ad, we need to now substract/add time
+            elif start >= ad_end: # we are after an ad, we need to now substract time
                 start -= duration # for each ad,
                 end -= duration # we shift the time
         if ACTION == 'INSERT':
-            if start >= ad_start: # if we start after an ad - any ad - add its duration
+            if start >= ad_start: # if we start after an ad, add its duration. Can happen multiple times
                 start += duration
                 end += duration
     return ( found_an_ad, ' --> '.join((to_time(start),  to_time(end))) ) #pack it into a neat timestamp again
@@ -96,7 +101,6 @@ def deconstruct_and_convert(stamp):
     four_components.extend((partial_split[2]).split('.'))
     return to_milliseconds(four_components)
 ###############################################################################################################################################################################################
-
 def main():
     ad_timings = []
     for ad in AD_OCCURRENCES:
