@@ -221,7 +221,7 @@ class App(tk.Frame):
         self.path.set(filedialog.askopenfilename())
         if '/' in self.path.get():
             self.filepath, self.filename = tuple(self.path.get().rsplit('/', 1))
-            for e in EPISODES:
+            for e in reversed(EPISODES):
                 if e in self.filename or str(int(e)) in self.filename:
                     self.episodeNr.set(e)
                     self.length.set(LENGTHS[int(e)])
