@@ -222,7 +222,7 @@ class App(tk.Frame):
         if '/' in self.path.get():
             self.filepath, self.filename = tuple(self.path.get().rsplit('/', 1))
             for e in EPISODES:
-                if e in self.filename:
+                if e in self.filename or str(int(e)) in self.filename:
                     self.episodeNr.set(e)
                     self.length.set(LENGTHS[int(e)])
                     self.speaker.set(', '.join(SPEAKER[int(e)]))
@@ -233,6 +233,7 @@ class App(tk.Frame):
         self.error.set('')
         self.outpath.set(filedialog.askdirectory())
     def convert(self):
+        vtt=False
         if '/' in self.path.get():
             self.filepath, self.filename = tuple(self.path.get().rsplit('/', 1))
         else:
@@ -249,7 +250,7 @@ class App(tk.Frame):
         if not ('.txt' in self.filename[-5:] or '.vtt' in self.filename[-5:]):
             self.error.set('Wrong type of file, expected .txt or .vtt')
             return
-        if '.vtt' in self.filename[-5:]:
+        if '.vtt' in self.filename[-9:]:
             vtt = True
         try:
             int(self.episodeNr.get())
@@ -322,18 +323,28 @@ class MainProgram():
                 if not note and '-->' in line: # we are expecting a timestamp here, always contains -->
                     time = line.strip() # there might be whitespace, meaning a wrench in my functions. gets rid of it
                     continue # no additional content here
-                content = ''.join((content, line)) # additional spoken words for the current timestamp
+                if len(content) > 1:
+                    content = ' '.join((content, line.strip())) # additional spoken words for the current timestamp
+                else:
+                    content = ''.join((content, line.strip()))
             if note: # it's a comment/NOTE
-                tokens.append(list((0, '', '', content))) # 0 means NOTE, will be decoded in the save_as_vtte method
+                if not 'www.descript.com' in content:
+                    tokens.append(list((0, '', '', content))) # 0 means NOTE, will be decoded in the save_as_vtte method
             else: # not a NOTE, actual cue
                 if '<v' in content[:3]: # already tagged
                     content = content.strip()
                     content = content[3:]
                     currentspeaker, content = tuple(content.split('>', 1))
+                    for S in SPEAKER[self.episodeNr]:
+                        if currentspeaker in S:
+                            currentspeaker = S
                     tokens.append(list((1, currentspeaker, time, content)))
                 else: # old format
                     if ':' in content[:32]:
                         currentspeaker, content = tuple(content.split(':', 1))
+                    for S in SPEAKER[self.episodeNr]:
+                        if currentspeaker in S:
+                            currentspeaker = S
                     tokens.append(list((2, currentspeaker, time, content)))
         return tokens
 
@@ -442,7 +453,7 @@ class MainProgram():
             else:
                 filename = ''.join((self.filename, '.vtt'))
         with open('/'.join((self.output, filename)), 'w') as file:
-            file.write('\nWEBVTT\n\n')
+            file.write('WEBVTT\n\n')
             vtt = False
             if len(tokens[0]) == 4:
                 vtt = True
@@ -535,7 +546,38 @@ class MainProgram():
 ## all episode lengths up to EP30
 CURRENT = 30
 EPISODES= [str(e).zfill(2) for e in range(0,CURRENT+1)]; EPISODES.pop(19)
-LENGTHS = ['0:01:34', '02:52:35', '00:28:33', '01:21:31', '02:45:48', '01:51:21', '02:01:59', '02:01:16', '01:08:49', '02:19:36', '01:43:27', '02:38:59', '01:35:46', '01:38:20', '01:06:39', '01:50:54', '02:18:17', '02:20:04', '01:07:58', '02:18:33', '02:23:04', '01:52:50', '01:10:39', '02:11:03', '01:55:20', '01:09:33', '02:29:56', '03:38:06', '02:05:43', '02:03:49', '02:37:03']
+LENGTHS = ['0:01:34', #0
+	'02:52:35', 
+	'00:28:33', 
+	'01:21:31', 
+	'02:45:48', 
+	'01:51:21', 
+	'02:01:59', 
+	'02:01:16', 
+	'01:08:49', 
+	'02:19:36', 
+	'01:43:27', #10
+	'02:38:59', 
+	'01:35:46', 
+	'01:38:20', 
+	'01:06:39', 
+	'01:50:54', 
+	'02:18:17', 
+	'02:20:04', 
+	'01:07:58', 
+	'02:18:33', 
+	'02:23:04', #20
+	'01:52:50', 
+	'01:10:39', 
+	'02:11:03', 
+	'01:55:20', 
+	'01:09:33', 
+	'02:29:56', 
+	'03:38:06', 
+	'02:05:43', 
+	'02:03:49', 
+	'02:37:03'  #30
+	]
 SPEAKER = [['Eric Weinstein'], #0
            ['Eric Weinstein', 'Peter Thiel'],
            ['Eric Weinstein'],
