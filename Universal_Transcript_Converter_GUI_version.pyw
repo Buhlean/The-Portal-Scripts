@@ -1,7 +1,6 @@
 
 import tkinter as tk
 from tkinter import filedialog
-import functools
 
 class Root(tk.Tk):
     def __init__(self):
@@ -13,7 +12,7 @@ class Root(tk.Tk):
         
 class App(tk.Frame):
     def __init__(self, root):
-        super().__init__(bg='#1D243A', bd=0, relief=tk.GROOVE, padx=10, pady=10)
+        super().__init__(bg='#1D243A', bd=0, relief=tk.GROOVE, padx=20, pady=20)
         self.path, self.outpath, self.episodeNr, self.source    = tk.StringVar(self, 'C:/'), tk.StringVar(self, 'C:/'), tk.StringVar(self, 0), tk.StringVar(self, '')
         self.service, self.speaker, self.length, self.error     = tk.StringVar(self, ''), tk.StringVar(self, 'Eric Weinstein'), tk.StringVar(self, '00:00:00'), tk.StringVar(self, '')
         self.filepath, self.filename = '', ''
@@ -24,99 +23,92 @@ class App(tk.Frame):
         self.drawGUI()
 
     def drawGUI(self):
+        padding = 6
         ##########
         ## FILE ##
         framefile = tk.Frame(self)
+        framefile.configure(pady=padding, bg='#1D243A')
         framefile.columnconfigure(1, weight=1)
         framefile.pack(side=tk.TOP, fill=tk.X)
         #LabelFile
         tk.Label(framefile, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, pady=8, padx=8,
+                 bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='Location of transcript file'
-                 ).grid(columnspan=5, sticky='NEWS')
+                 ).grid(columnspan=5, sticky='NEWS', pady=(0,8))
         #EntryFile
-        tk.Label(framefile, bg='#1D243A', bd=0, padx=4).grid(column=0, row=1, sticky='NEWS') #padding
         tk.Entry(framefile, bg='#111111', font=("Helvetica", "13"),
                  bd=0, fg='#ffffff', justify=tk.LEFT, 
                  highlightthickness=0, 
                  textvariable=self.path
                  ).grid(column=1, row=1, sticky='NEWS')
         #ButtonFile
-        tk.Label(framefile, bg='#1D243A', bd=0, padx=4).grid(column=2, row=1, sticky='NEWS') #padding
         tk.Button(framefile, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
                   command=self.openfile, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
                   highlightcolor='#eaff68', relief=tk.RAISED, text='Open...', width=9
                   ).grid(column=3, row=1, sticky='EW')
-        tk.Label(framefile, bg='#1D243A', bd=0, padx=4).grid(column=4, row=1, sticky='NEWS') #padding
-        tk.Label(framefile, bg='#1D243A', bd=0, pady=0).grid(columnspan=5, row=2, sticky='NEWS') #padding
 
         #############
         ## EPISODE ##
         frameepisode = tk.Frame(self)
+        frameepisode.configure(pady=padding, bg='#1D243A')
         frameepisode.columnconfigure(2, weight=1)
         frameepisode.pack(side=tk.TOP, fill=tk.X)
         #LabelEpisode
         tk.Label(frameepisode, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, pady=8, padx=8,
+                 bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='Which Episode is this from? (optional)'
-                 ).grid(columnspan=5, sticky='NEWS')
+                 ).grid(columnspan=5, sticky='NEWS', pady=(0,8))
         #EntryEpisode
-        tk.Label(frameepisode, bg='#1D243A', bd=0, padx=4).grid(column=0, row=1, sticky='NEWS') #padding
         tk.Entry(frameepisode, bg='#111111', font=("Helvetica", "13"),
                  bd=0, fg='#ffffff', justify=tk.LEFT, width=4,
                  highlightthickness=0, 
                  textvariable=self.episodeNr
                  ).grid(column=1, row=1, sticky='NEWS')
-        tk.Label(frameepisode, bg='#1D243A', bd=0, padx=4).grid(column=2, row=1, sticky='NEWS') #padding
         tk.Button(frameepisode, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
                   command=self.episode_fill, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
                   highlightcolor='#eaff68', relief=tk.RAISED, text='Fill in', width=9
                   ).grid(column=3, row=1, sticky='EW')
-        tk.Label(frameepisode, bg='#1D243A', bd=0, padx=4).grid(column=4, row=1, sticky='NEWS') #padding
-        tk.Label(frameepisode, bg='#1D243A', bd=0, pady=0).grid(columnspan=5, row=2, sticky='NEWS') #padding
 
         ############
         ## OUTPUT ##
         frameoutput = tk.Frame(self)
+        frameoutput.configure(pady=padding, bg='#1D243A')
         frameoutput.columnconfigure(1, weight=1)
         frameoutput.pack(side=tk.TOP, fill=tk.X)
         #LabelOutput
         tk.Label(frameoutput, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, pady=8, padx=8,
+                 bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='Where should the output go? (optional)'
-                 ).grid(columnspan=5, sticky='NEWS')
+                 ).grid(columnspan=5, sticky='NEWS', pady=(0,8))
         #EntryOutput
-        tk.Label(frameoutput, bg='#1D243A', bd=0, padx=4).grid(column=0, row=1, sticky='NEWS') #padding
         tk.Entry(frameoutput, bg='#111111', font=("Helvetica", "13"),
                  bd=0, fg='#ffffff', justify=tk.LEFT, 
                  highlightthickness=0,
                  textvariable=self.outpath
                  ).grid(column=1, row=1, sticky='NEWS')
-        tk.Label(frameoutput, bg='#1D243A', bd=0, padx=4).grid(column=2, row=1, sticky='NEWS') #padding
         #ButtonOutput
         tk.Button(frameoutput, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
                   command=self.getsaveplace, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
                   highlightcolor='#eaff68', relief=tk.RAISED, text='Choose...', width=9
                   ).grid(column=3, row=1, sticky='EW')
-        tk.Label(frameoutput, bg='#1D243A', bd=0, padx=4).grid(column=4, row=1, sticky='NEWS') #padding
-        tk.Label(frameoutput, bg='#1D243A', bd=0, pady=0).grid(columnspan=5, row=2, sticky='NEWS') #padding
 
         #############
         ## SERVICE ##
         frameservice = tk.Frame(self)
-        columns = 5
+        frameservice.configure(pady=padding, bg='#1D243A')
+        columns = 6
         for i in range(columns):
-            frameservice.columnconfigure(i, weight=1)
+            frameservice.columnconfigure(i, weight=4)
         frameservice.pack(side=tk.TOP, fill=tk.X)
         #LabelService
         tk.Label(frameservice, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, pady=8, padx=8,
+                 bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='From where did you export the transcript? (optional for .vtt)'
-                 ).grid(columnspan=columns, sticky='NEWS')
+                 ).grid(columnspan=columns, sticky='NEWS', pady=(0,8))
         self.service.set('Descript')
         #RadioDescript
         tk.Radiobutton(frameservice, anchor='nw', font=("Helvetica", "13"), 
-                       bd=0, pady=0, padx=8, justify=tk.LEFT, width=13,
+                       bd=0, pady=0, padx=0, justify=tk.LEFT, width=13,
                        bg='#1D243A', fg='#ffffff', selectcolor='#1D243A',
                        activebackground='#1D243A', activeforeground='#7a7e8f',
                        text='Descript', var=self.service, value='Descript'
@@ -127,80 +119,73 @@ class App(tk.Frame):
                        activebackground='#1D243A', activeforeground='#7a7e8f',
                        text='Otter.ai', var=self.service, value='Otter'
                        ).grid(row=1, column=1, sticky='NEWS')
-        tk.Label(frameservice, bg='#1D243A', bd=0, pady=0).grid(column=2, columnspan=columns-2, row=1, sticky='NEWS') #padding
-        tk.Label(frameservice, bg='#1D243A', bd=0, pady=0).grid(columnspan=columns, row=2, sticky='NEWS') #padding
 
         ############
         ## SOURCE ##
         framesource = tk.Frame(self)
+        framesource.configure(pady=padding, bg='#1D243A')
         for i in range(columns):
-            framesource.columnconfigure(i, weight=1)
+            framesource.columnconfigure(i, weight=4)
         framesource.pack(side=tk.TOP, fill=tk.X)
         #LabelSource
         tk.Label(framesource, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, pady=8, padx=8,
+                 bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='From where did you download the audio?'
-                 ).grid(columnspan=columns, sticky='EW')
+                 ).grid(columnspan=columns, sticky='EW', pady=(0,8))
         self.source.set('art19')
         tk.Radiobutton(framesource, anchor='nw', font=("Helvetica", "13"), 
-                       bd=0, pady=0, padx=8, justify=tk.LEFT, width=13,
+                       bd=0, pady=0, padx=0, justify=tk.LEFT, width=13,
                        bg='#1D243A', fg='#ffffff', selectcolor='#1D243A',
                        activebackground='#1D243A', activeforeground='#7a7e8f',
                        text='Art19/Podcast Feed', var=self.source, value='art19'
                        ).grid(row=1, column=0, sticky='NEWS')
         tk.Radiobutton(framesource, anchor='nw', font=("Helvetica", "13"), 
-                       bd=0, pady=0, padx=0, justify=tk.LEFT,
+                       bd=0, pady=0, padx=4, justify=tk.LEFT,
                        bg='#1D243A', fg='#ffffff', selectcolor='#1D243A',
                        activebackground='#1D243A', activeforeground='#7a7e8f',
                        text='YouTube', var=self.source, value='yt'
                        ).grid(row=1, column=1, sticky='NEWS')
-        tk.Label(framesource, bg='#1D243A', bd=0, pady=0).grid(column=2, columnspan=columns-2, row=1, sticky='NEWS') #padding
-        tk.Label(framesource, bg='#1D243A', bd=0, pady=1).grid(columnspan=columns, row=2, sticky='NEWS') #padding
 
         #############
         ## SPEAKER ##
         framespeaker = tk.Frame(self)
+        framespeaker.configure(pady=padding, bg='#1D243A')
         framespeaker.columnconfigure(1, weight=1)
         framespeaker.pack(side=tk.TOP, fill=tk.X)
         #LabelEpisode
         tk.Label(framespeaker, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, pady=8, padx=8,
+                 bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='Who are the Speakers? (separate by comma)'
-                 ).grid(columnspan=3, sticky='NEWS')
+                 ).grid(columnspan=3, sticky='NEWS', pady=(0,8))
         #EntryEpisode
-        tk.Label(framespeaker, bg='#1D243A', bd=0, padx=4).grid(column=0, row=1, sticky='NEWS') #padding
         tk.Entry(framespeaker, bg='#111111', font=("Helvetica", "13"),
                  bd=0, fg='#ffffff', justify=tk.LEFT, width=40,
                  highlightthickness=0, 
                  textvariable=self.speaker
-                 ).grid(column=1, row=1, sticky='NEWS')
-        tk.Label(framespeaker, bg='#1D243A', bd=0, padx=4).grid(column=2, row=1, sticky='NEWS') #padding
-        tk.Label(framespeaker, bg='#1D243A', bd=0, pady=0).grid(columnspan=3, row=2, sticky='NEWS') #padding
+                 ).grid(columnspan=2, row=1, sticky='NEWS', ipady=4)
+        tk.Label(framespeaker, bg='#1D243A', bd=0, width=12).grid(column=2, row=1, sticky='NEWS')
 
         #############
         ## LENGTH ##
         framelength = tk.Frame(self)
+        framelength.configure(pady=padding, bg='#1D243A')
         framelength.columnconfigure(2, weight=1)
-        framelength.pack(side=tk.TOP, fill=tk.X)
+        framelength.pack(side=tk.TOP, pady=(0,4), fill=tk.X)
         #LabelEpisode
         tk.Label(framelength, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, pady=8, padx=8,
+                 bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='Length of the Episode? (optional, first 30 are known to program)'
-                 ).grid(columnspan=3, sticky='NEWS')
+                 ).grid(columnspan=3, sticky='NEWS', pady=(0,8))
         #EntryEpisode
-        tk.Label(framelength, bg='#1D243A', bd=0, padx=4).grid(column=0, row=1, sticky='NEWS') #padding
         tk.Entry(framelength, bg='#111111', font=("Helvetica", "13"),
                  bd=0, fg='#ffffff', justify=tk.LEFT, width=8,
                  highlightthickness=0, 
                  textvariable=self.length
-                 ).grid(column=1, row=1, sticky='NEWS')
-        tk.Label(framelength, bg='#1D243A', bd=0, padx=4).grid(column=2, row=1, sticky='NEWS') #padding
-        tk.Label(framelength, bg='#1D243A', bd=0, pady=0).grid(columnspan=3, row=2, sticky='NEWS') #padding
+                 ).grid(column=1, row=1, sticky='NEWS', ipady=4)
 
         ############
         ## SUBMIT ##
         #ButtonSubmit
-        tk.Label(self, bg='#1D243A', bd=0, padx=4).pack(side=tk.RIGHT)
         tk.Button(self, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
                   command=self.convert, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
                   highlightcolor='#eaff68', relief=tk.RAISED, text='Convert', width=9
@@ -268,49 +253,52 @@ class App(tk.Frame):
                     self.service.get(), self.speaker.get(),
                     length, self.outpath.get())
         self.error.set('Success!')    
-    
+
+####################################################################################################################################################
+####################################################################################################################################################
+####################################################################################################################################################
 class MainProgram():
     def __init__(self, filepath, filename, episodeNr, source, service, speaker, length=None, output=None):
-        self.filepath, self.filename, self.source, self.service, self.length, self.output = filepath, filename, source, service, length, output
+        self.filepath, self.filename, self.source   = filepath, filename, source
+        self.service, self.length, self.output      = service, length, output
+        self.speaker                                = speaker
+
         try:
             self.episodeNr = int(episodeNr) # I checked above, but you never know...
         except:
             self.episodeNr = 0
+            
         if self.output is None or self.output == '':
             self.output = self.filepath
-        if self.episodeNr <= CURRENT and self.episodeNr > 0:
-            if len(speaker) < len(SPEAKER[self.episodeNr]):
-                speaker = SPEAKER[self.episodeNr]
+            
+        if self.episodeNr <= CURRENT and self.episodeNr > 0: # fill everything out if it's in the archives
+            if len(speaker) < len(SPEAKER[self.episodeNr]): # not '<=' to give custom names and abbreviations a chance
+                self.speaker = SPEAKER[self.episodeNr]
             self.length = LENGTHS[self.episodeNr]
 
         with open('/'.join((filepath, filename)), 'r') as file:
             rawlines = [line for line in file]
         rawtext = ''.join(rawlines)
-        self.speaker = []
-        for s in speaker:
-            if ' ' in s:
-                self.speaker.append(s.rsplit(' ', 1)[1])
+        rawlines= []
+                
         tokens = []
-
         if('vtt' in filename.rsplit('.', 1)):
             tokens = self.parse_vtt(rawtext)
         elif('descript' in service.lower()):
-            title, cleanedtext = (lambda x: (x[0], x[1:]))(rawtext.split('[', 1))
-            tokens = self.parse_descript(cleanedtext, self.speaker)
+            tokens = self.parse_descript((rawtext.split('[', 1))[1:], self.speaker)
         elif('otter' in service.lower()):
-            tokens = self.parse_otter(rawtext, self.speaker)
+            tokens = self.parse_otter(rawtext.rsplit('Transcribed by https://otter.ai',1)[0])
         else:
-            assert False, 'Wrong source, please choose art19 or youtube or wiki.'
-
-        self.save_as_srt(tokens)
+            assert False, 'Wrong source, please choose art19 or youtube.'
+        rawtext = ''
+        
+        #self.save_as_srt(tokens)
         self.save_as_vtt(tokens)
         self.save_as_wiki(tokens)
         
     def parse_vtt(self, rawtext):
         tokens = []
-        time = ''
-        currentspeaker = ''
-        content = ''
+        time, currentspeaker, content = '', '', ''
 
         rawtext = rawtext.split('WEBVTT', 1)[1].strip() # remove everything above the first actual line 
         for block in rawtext.split('\n\n'): # specification says two newline between each block. very handy!
@@ -329,25 +317,22 @@ class MainProgram():
                     content = ''.join((content, line.strip()))
             if note: # it's a comment/NOTE
                 if not 'www.descript.com' in content:
-                    tokens.append(list((0, '', '', content))) # 0 means NOTE, will be decoded in the save_as_vtte method
+                    tokens.append(list((1, '', '', content))) # 0 means NOTE, will be decoded in the save_as_vtte method
             else: # not a NOTE, actual cue
                 if '<v' in content[:3]: # already tagged
                     content = content.strip()
                     content = content[3:]
                     currentspeaker, content = tuple(content.split('>', 1))
-                    for S in SPEAKER[self.episodeNr]:
-                        if currentspeaker in S:
-                            currentspeaker = S
-                    tokens.append(list((1, currentspeaker, time, content)))
                 else: # old format
                     if ':' in content[:32]:
-                        currentspeaker, content = tuple(content.split(':', 1))
-                    for S in SPEAKER[self.episodeNr]:
-                        if currentspeaker in S:
-                            currentspeaker = S
-                    tokens.append(list((2, currentspeaker, time, content)))
+                        currentspeaker, content = tuple(content.split(': ', 1))
+                for S in SPEAKER[self.episodeNr]:
+                    if currentspeaker in S:
+                        currentspeaker = S
+                tokens.append(list((0, currentspeaker, time, content)))
         return tokens
 
+    ## TODO: cleanup, verify this
     def parse_descript(self, text, people):
         tokens = [] #initialize
         for line in text[0].split('['): # brackets contain timestamp
@@ -358,190 +343,117 @@ class MainProgram():
             splittext[1] = splittext[1].strip() # remove trailing whitespace and the newline at the end
             if splittext[1] == '': # two timestamps following each other without content
                 continue # ...with the next timestamp
-            tokens.append(splittext) # token contains time and text
+            tokens.append(0, splittext) # token contains time and text
 
-        tokengen1 = (t for t in tokens)
-        prevtoken = next(tokengen1) 
-        newtokens = [] 
-        for token in tokengen1: # calculate 'start -> end' from two neighbouring tokens timestamps
-            newtokens.append([''.join((prevtoken[0], '.000', ' --> ', token[0], '.000')), prevtoken[1]])
-            prevtoken = token
-        try: # I saved most episode lengths in a list below
-            newtokens.append([prevtoken[0], ''.join((prevtoken[1], '.000', ' --> ', LENGTHS[self.episodeNr], '.000')), prevtoken[2]])
-        except: # default
-            try:
-                newtokens.append([prevtoken[0], ''.join((prevtoken[1], '.000', ' --> ', self.length, '.000')), prevtoken[2]])
-            except:
-                newtokens.append([prevtoken[0], ''.join((prevtoken[1], '.000', ' --> ', '9:00:00', '.000')), prevtoken[2]])
+        newtokens = self.make_timestamps(tokens)
         
         tokengen2 = (token for token in newtokens)
         finaltokens = []
-        currentspeaker = next(tokengen2)[1] # always starts with Eric
+        currentspeaker = next(tokengen2)[2] # always starts with Eric
         Speaker = [s+':' for s in people] # format the folks to fit the file
 
         for token in tokengen2:
             found = False
             for sp in Speaker:
-                if sp in token[1]:
-                    currentspeaker = token[1]
+                if sp in token[2]:
+                    currentspeaker = token[2]
                     found = True
                     break
             if not found:
-                finaltokens.append([currentspeaker, token[0], token[1]])
+                finaltokens.append([0,currentspeaker, token[1], token[2]])
         return finaltokens
 
-    def parse_otter(self, rawtext, people):
+    def parse_otter(self, rawtext):
         tokens = []
-        found = False
-        currentspeaker = 'Weinstein'
-        linegen = (x for x in rawtext.split('\n')) # makes a 'generator' out of the list
-        # so that I can call next() on it from within the loop. very helpful here
-        for line in linegen:
-            if len(line) == 0:
-                continue
-            found = False
-            for i in range(len(people)):
-                if people[i] in line:
-                    currentspeaker = self.speaker[i]
-                    time = line.split('  ')[1]
-                    found = True
-            if not found:
+        currentspeaker = ''
+        blockgen = (x for x in rawtext.split('\n\n')) # makes a 'generator' out of the list
+        for block in blockgen:
+            lines = block.split('\n',1)
+            lines[0] = lines[0].strip()
+            if len(lines[0]) < 4:
                 break
-            ## end parsing line
+            currentspeaker, time = lines[0].split('  ')
             if len(time) < 7: ## e.g. 10:35 instead of 00:10:35
                 if len(time) == 4:
                     time = ''.join(('00:0', time)) # for the first 10 seconds, e.g. 0:01
                 else:
                     time = ''.join(('00:', time))
             elif len(time) == 7:
-                time = ''.join(('0', time)) # for 1:20:41 , makes it 01:20:41
+                time     = ''.join(('0', time)) # for 1:20:41 , makes it 01:20:41
             
-            tokens.append(list((currentspeaker, time, next(linegen))))
-        # edit timestamps to be usable in vtt
-        prevtoken = []
+            tokens.append(list((0, currentspeaker, time, lines[1])))
+        return self.make_timestamps(tokens)
+    
+    def make_timestamps(self, tokens):
+        tokengen = (t for t in tokens)
+        prevtoken = next(tokengen)
         newtokens = []
-        first = True
-        for token in tokens:
-            if first:
-                prevtoken = token
-                first = False
-                continue
-            # I take the timestamp from the previous token and assume that the sentence ended at the beginning of the current one.
-            newtokens.append([prevtoken[0], ''.join((prevtoken[1], '.000', ' --> ', token[1], '.000')), prevtoken[2]])
+        for token in tokengen:
+            newtokens.append(    [0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', token[2], '.000')), prevtoken[3]])
             prevtoken = token
         # there is now only the last token left, that's where the LENGTH of the episode comes into play
         try: # I saved most episode lengths in a list below
-            newtokens.append([prevtoken[0], ''.join((prevtoken[1], '.000', ' --> ', LENGTHS[self.episodeNr], '.000')), prevtoken[2]])
+            newtokens.append(    [0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', LENGTHS[self.episodeNr], '.000')), prevtoken[3]])
         except: # default
             try:
-                newtokens.append([prevtoken[0], ''.join((prevtoken[1], '.000', ' --> ', self.length, '.000')), prevtoken[2]])
+                newtokens.append([0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', self.length, '.000')), prevtoken[3]])
             except:
-                newtokens.append([prevtoken[0], ''.join((prevtoken[1], '.000', ' --> ', '9:00:00', '.000')), prevtoken[2]])
+                newtokens.append([0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', '9:00:00', '.000')), prevtoken[3]])
         return newtokens
     
     ######################################################################################################################################################
+
     ## vtt file, specification-compliant
     def save_as_vtt(self, tokens):
-        if self.episodeNr != 0:
-            if self.source is not None:
-                filename = ''.join(('Ep_', str(self.episodeNr), '_', self.source.lower(), '.vtt'))
-            else:
-                filename = ''.join(('Ep_', str(self.episodeNr), '.vtt'))
-        else:
-            if self.source is not None:
-                filename = ''.join((self.filename, '_', self.source.lower(), '.vtt'))
-            else:
-                filename = ''.join((self.filename, '.vtt'))
-        with open('/'.join((self.output, filename)), 'w') as file:
+        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr != 0 else self.filename
+        filename = ''.join((filename, '_', self.source.lower())) if self.source is not None else filename
+        if self.filename[:-4] == filename:
+            ''.join((filename, '(1)'))
+        with open(''.join((self.output, '/', filename, '.vtt')), 'w') as file:
             file.write('WEBVTT\n\n')
-            vtt = False
-            if len(tokens[0]) == 4:
-                vtt = True
-            if not vtt:
-                for token in tokens:
+            for token in tokens:
+                if token[0] == 1:
+                    file.write(f'NOTE\n{token[3]}\n\n')
+                else:
                     file.write(f'{token[2]}\n<v {token[1]}>{token[3]}\n\n')
-            else:
-                try:
-                    
-                    for token in tokens:
-                        if token[0] == 0:
-                            file.write(f'NOTE\n{token[3]}\n\n')
-                        else:
-                            file.write(f'{token[2]}\n<v {token[1]}>{token[3]}\n\n')
-                except IndexError:
-                    print('ERRORERROR')
-                    print(len(token))
-                    print(token)
-            
+                
     ## srt file, specification-compliant
     def save_as_srt(self, tokens):
-        if self.episodeNr != 0:
-            if self.source is not None:
-                filename = ''.join(('Ep_', str(self.episodeNr), '_', self.source.lower(), '.srt'))
-            else:
-                filename = ''.join(('Ep_', str(self.episodeNr), '.srt'))
-        else:
-            if self.source is not None:
-                filename = ''.join((self.filename, '_', self.source.lower(), '.srt'))
-            else:
-                filename = ''.join((self.filename, '.srt'))
-        with open('/'.join((self.output, filename)), 'w') as file:
+        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr != 0 else self.filename
+        filename = ''.join((filename, '_', self.source.lower())) if self.source is not None else filename
+        if self.filename[:-4] == filename:
+            ''.join((filename, '(1)'))
+        with open(''.join((self.output, '/', filename, '.srt')), 'w') as file:
             i = 0
             currentspeaker = ''
-            vtt = False
-            if len(tokens[0]) == 4:
-                vtt = True
             for token in tokens:
-                if vtt:
-                    if token[0] == 0:
-                        continue
-                    if token[0] == currentspeaker: # still the same speaker? 
-                        preamble = ''
-                    else: # only print speaker name if it changed since last sentence
-                        currentspeaker = token[1]
-                        preamble = f'{currentspeaker}: '
-                    i += 1
-                    file.write(f'{i}\n{token[2]}\n{preamble}{token[3]}\n\n')
-                else:
-                    if token[0] == currentspeaker: # still the same speaker? 
-                        preamble = ''
-                    else: # only print speaker name if it changed since last sentence
-                        currentspeaker = token[0]
-                        preamble = f'{currentspeaker}: '
-                    i += 1
-                    file.write(f'{i}\n{token[1]}\n{preamble}{token[2]}\n\n')
+                if token[0] == 1:
+                    continue
+                preamble = ''
+                if not token[1] == currentspeaker: # different speaker? new headline
+                    preamble = f'{currentspeaker}: '
+                i += 1
+                file.write(f'{i}\n{token[2]}\n{preamble}{token[3]}\n\n')
 
     ## wiki markup
     def save_as_wiki(self, tokens):
-        if self.episodeNr != 0:
-            filename = ''.join(('Ep_', str(self.episodeNr), '_', 'wiki', '.txt'))
-        else:
-            filename = ''.join((self.filename, '_', 'wiki', '.txt'))
-        with open('/'.join((self.output, filename)), 'w') as file:
+        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr != 0 else self.filename
+        with open(''.join((self.output, '/', filename, '_wiki.txt')), 'w') as file:
             currentspeaker = ''
-            vtt = False
-            if len(tokens[0]) == 4:
-                vtt = True
             for token in tokens:
-                if vtt:
-                    if token[0] == 0:
-                        continue
-                    token.pop(0)
-                if 'STARTAD' in token[2][:10]:
+                if token[0] == 1:
+                    continue
+                if 'STARTAD' in token[3][:10]:
                     file.write('\n\n\'\'\'AD\'\'\'')
-                    token[2] = token[2].split('ENDAD', 1)[1]
+                    token[3] = token[3].split('ENDAD', 1)[1]
                     currentspeaker = ''
                     if len(token[2]) <4:
                         continue
-                time = token[1].split(' --> ')[0][:-4]
-                if token[0] == currentspeaker: # same speaker? no new headline
-                    preamble = ''
-                else: # only print speaker name if it changed since last sentence, \' escapes the ' for wiki markup
-                    currentspeaker = token[0]
-                    preamble = f'\n\n\'\'\'[{time}] {currentspeaker}:\'\'\' '
-                file.write(preamble) # speaker or empty
-                #format: <span title="timstamp here">text here</span>
-                file.write(f'<span title=\"{time}\">{token[2]}</span>')
+                time = token[2].split(' --> ')[0][:-4]
+                if not token[0] == currentspeaker: # different speaker? new headline
+                    file.write(f'\n\'\'\'[{time}] {token[1]}:\'\'\' ')
+                file.write(f'<span title=\"{time}\">{token[3]}</span>')
+                
 ###############################################################################################################################################################################################
 ## all episode lengths up to EP30
 CURRENT = 30
