@@ -1,3 +1,10 @@
+## Tour guide:
+## first, the GUI
+## then, the parser area
+## then saving the generated tokens
+## lastly, the archives of all episode data for the program to draw from.
+## Enjoy your stay!
+__author__ = 'Buhlean'
 
 import tkinter as tk
 from tkinter import filedialog
@@ -9,12 +16,18 @@ class Root(tk.Tk):
         self.configure(bg='#1D243A')
         self.geometry('580x580+40+40')
         self.resizable(True, True)
-        
+        self.app = App(self)
+        self.bind('<Return>',   self.app.convert)
+        self.bind('<Escape>',   (lambda s: self.destroy()) ) # destroy takes 1 argument (self), this lambda deletes the second (event). kind of a hack, not bad enough for me to care...
+        self.bind('<Control-o>',  self.app.openfile)
+        self.bind('<Control-KeyPress-f>',  self.app.episode_fill)
+      
 class App(tk.Frame):
     def __init__(self, root):
         super().__init__(bg='#1D243A', bd=0, relief=tk.GROOVE, padx=20, pady=20)
         self.path, self.outpath, self.episodeNr, self.source    = tk.StringVar(self, 'C:/'), tk.StringVar(self, 'C:/'), tk.StringVar(self, 0), tk.StringVar(self, '')
         self.service, self.speaker, self.length, self.error     = tk.StringVar(self, ''), tk.StringVar(self, 'Eric Weinstein'), tk.StringVar(self, '00:00:00'), tk.StringVar(self, '')
+        self.special                                            = tk.StringVar(self, '')
         self.filepath, self.filename = '', ''
 
         self.pack(side="top", fill="both", expand=True)
@@ -23,62 +36,69 @@ class App(tk.Frame):
         self.drawGUI()
 
     def drawGUI(self):
-        padding = 6
-        ##########
-        ## FILE ##
+        self.padding = 6
+        self.columns = 6
+        self.drawfile()
+        self.drawepisode()
+        self.drawoutput()
+        self.drawservice()
+        self.drawsource()
+        self.drawspeaker()
+        self.drawlength()
+        self.drawother()
+
+    def drawfile(self):    
         framefile = tk.Frame(self)
-        framefile.configure(pady=padding, bg='#1D243A')
+        framefile.configure(pady=self.padding, bg='#1D243A')
         framefile.columnconfigure(1, weight=1)
         framefile.pack(side=tk.TOP, fill=tk.X)
         #LabelFile
-        tk.Label(framefile, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT,
-                 text='Location of transcript file'
+        tk.Label(framefile, anchor='nw', bg='#1D243A', font=("Helvetica", "13"), bd=0, fg='#ffffff',
+                 justify=tk.LEFT, text='Location of transcript file'
                  ).grid(columnspan=5, sticky='NEWS', pady=(0,8))
         #EntryFile
-        tk.Entry(framefile, bg='#111111', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, 
-                 highlightthickness=0, 
-                 textvariable=self.path
+        tk.Entry(framefile, bg='#111111', font=("Helvetica", "13"), bd=0, fg='#ffffff', justify=tk.LEFT,
+                 highlightthickness=0, textvariable=self.path
                  ).grid(column=1, row=1, sticky='NEWS')
         #ButtonFile
-        tk.Button(framefile, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
-                  command=self.openfile, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
-                  highlightcolor='#eaff68', relief=tk.RAISED, text='Open...', width=9
+        tk.Button(framefile, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e', command=self.openfile, fg='#ffffff',
+                  font=("Helvetica", "13"), padx=0, pady=0, highlightcolor='#eaff68', relief=tk.RAISED, text='Open...', width=9
                   ).grid(column=3, row=1, sticky='EW')
-
-        #############
-        ## EPISODE ##
+    def drawepisode(self):
         frameepisode = tk.Frame(self)
-        frameepisode.configure(pady=padding, bg='#1D243A')
-        frameepisode.columnconfigure(2, weight=1)
+        frameepisode.configure(pady=self.padding, bg='#1D243A')
+        frameepisode.columnconfigure(3, weight=1)
         frameepisode.pack(side=tk.TOP, fill=tk.X)
         #LabelEpisode
-        tk.Label(frameepisode, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT,
-                 text='Which Episode is this from? (optional)'
+        tk.Label(frameepisode, anchor='nw', bg='#1D243A', font=("Helvetica", "13"), bd=0, fg='#ffffff',
+                 justify=tk.LEFT, text='Which Episode is this from? (optional)'
                  ).grid(columnspan=5, sticky='NEWS', pady=(0,8))
         #EntryEpisode
-        tk.Entry(frameepisode, bg='#111111', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, width=4,
-                 highlightthickness=0, 
-                 textvariable=self.episodeNr
-                 ).grid(column=1, row=1, sticky='NEWS')
-        tk.Button(frameepisode, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
-                  command=self.episode_fill, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
-                  highlightcolor='#eaff68', relief=tk.RAISED, text='Fill in', width=9
-                  ).grid(column=3, row=1, sticky='EW')
-
-        ############
-        ## OUTPUT ##
+        tk.Entry(frameepisode, bg='#111111', font=("Helvetica", "13"), bd=0, fg='#ffffff', justify=tk.LEFT,
+                 width=4, highlightthickness=0, textvariable=self.episodeNr
+                 ).grid(column=1, row=1, sticky='NEWS') # episode
+        tk.Label(frameepisode, anchor='s', bg='#1D243A', font=("Helvetica", "13"), bd=0, fg='#ffffff',
+                 justify=tk.CENTER, text='or', padx=12, pady=4,
+                 ).grid(column=2, row=1, sticky='NEWS', pady=(3,0)) # or
+        self.special.set('choose Special Episode')
+        choice=tk.Menubutton(frameepisode, activebackground='#7a7e8f', activeforeground='#111111', bd=1, bg='#111111', justify=tk.LEFT, anchor='w',
+                             fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0, highlightcolor='#eaff68', relief=tk.RAISED, textvariable=self.special)
+        choice.grid(column=3, row=1, sticky='EW', padx=(0,8), ipady=4) # special episode
+        choice.menu = tk.Menu(choice, tearoff=0, activebackground='#7a7e8f', activeforeground='#eaff68', bd=0, bg='#1D243A', fg='#ffffff', font=("Helvetica", "13"))
+        choice['menu'] = choice.menu
+        for ex in EXTERNAL.keys():
+            choice.menu.add_radiobutton(label=ex, variable=self.special, value=ex, command=self.external)
+        tk.Button(frameepisode, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e', command=self.episode_fill,
+                  fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0, highlightcolor='#eaff68', relief=tk.RAISED, text='Fill in', width=9
+                  ).grid(column=4, row=1, sticky='EW')
+    def drawoutput(self):
         frameoutput = tk.Frame(self)
-        frameoutput.configure(pady=padding, bg='#1D243A')
+        frameoutput.configure(pady=self.padding, bg='#1D243A')
         frameoutput.columnconfigure(1, weight=1)
         frameoutput.pack(side=tk.TOP, fill=tk.X)
         #LabelOutput
-        tk.Label(frameoutput, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT,
-                 text='Where should the output go? (optional)'
+        tk.Label(frameoutput, anchor='nw', bg='#1D243A', font=("Helvetica", "13"), bd=0, fg='#ffffff',
+                 justify=tk.LEFT, text='Where should the output go? (optional)'
                  ).grid(columnspan=5, sticky='NEWS', pady=(0,8))
         #EntryOutput
         tk.Entry(frameoutput, bg='#111111', font=("Helvetica", "13"),
@@ -87,57 +107,40 @@ class App(tk.Frame):
                  textvariable=self.outpath
                  ).grid(column=1, row=1, sticky='NEWS')
         #ButtonOutput
-        tk.Button(frameoutput, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
-                  command=self.getsaveplace, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
-                  highlightcolor='#eaff68', relief=tk.RAISED, text='Choose...', width=9
+        tk.Button(frameoutput, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e', command=self.getsaveplace,
+                  fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0, highlightcolor='#eaff68', relief=tk.RAISED, text='Choose...', width=9
                   ).grid(column=3, row=1, sticky='EW')
-
-        #############
-        ## SERVICE ##
+    def drawservice(self):
         frameservice = tk.Frame(self)
-        frameservice.configure(pady=padding, bg='#1D243A')
-        columns = 6
-        for i in range(columns):
+        frameservice.configure(pady=self.padding, bg='#1D243A')
+        for i in range(self.columns):
             frameservice.columnconfigure(i, weight=4)
         frameservice.pack(side=tk.TOP, fill=tk.X)
         #LabelService
-        tk.Label(frameservice, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT,
+        tk.Label(frameservice, anchor='nw', bg='#1D243A', font=("Helvetica", "13"), bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='From where did you export the transcript? (optional for .vtt)'
-                 ).grid(columnspan=columns, sticky='NEWS', pady=(0,8))
+                 ).grid(columnspan=self.columns, sticky='NEWS', pady=(0,8))
         self.service.set('Descript')
         #RadioDescript
-        tk.Radiobutton(frameservice, anchor='nw', font=("Helvetica", "13"), 
-                       bd=0, pady=0, padx=0, justify=tk.LEFT, width=13,
-                       bg='#1D243A', fg='#ffffff', selectcolor='#1D243A',
-                       activebackground='#1D243A', activeforeground='#7a7e8f',
-                       text='Descript', var=self.service, value='Descript'
+        tk.Radiobutton(frameservice, anchor='nw', font=("Helvetica", "13"), bd=0, pady=0, padx=0, justify=tk.LEFT, width=13,  bg='#1D243A', fg='#ffffff',
+                       selectcolor='#1D243A', activebackground='#1D243A', activeforeground='#7a7e8f', text='Descript', var=self.service, value='Descript'
                        ).grid(row=1, column=0, sticky='NEWS')
-        tk.Radiobutton(frameservice, anchor='nw', font=("Helvetica", "13"), 
-                       bd=0, pady=0, padx=0, justify=tk.LEFT,
-                       bg='#1D243A', fg='#ffffff', selectcolor='#1D243A',
-                       activebackground='#1D243A', activeforeground='#7a7e8f',
-                       text='Otter.ai', var=self.service, value='Otter'
+        tk.Radiobutton(frameservice, anchor='nw', font=("Helvetica", "13"), bd=0, pady=0, padx=0, justify=tk.LEFT, bg='#1D243A', fg='#ffffff',
+                       selectcolor='#1D243A', activebackground='#1D243A', activeforeground='#7a7e8f', text='Otter.ai', var=self.service, value='Otter'
                        ).grid(row=1, column=1, sticky='NEWS')
-
-        ############
-        ## SOURCE ##
+    def drawsource(self):
         framesource = tk.Frame(self)
-        framesource.configure(pady=padding, bg='#1D243A')
-        for i in range(columns):
+        framesource.configure(pady=self.padding, bg='#1D243A')
+        for i in range(self.columns):
             framesource.columnconfigure(i, weight=4)
         framesource.pack(side=tk.TOP, fill=tk.X)
         #LabelSource
-        tk.Label(framesource, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT,
+        tk.Label(framesource, anchor='nw', bg='#1D243A', font=("Helvetica", "13"), bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='From where did you download the audio?'
-                 ).grid(columnspan=columns, sticky='EW', pady=(0,8))
+                 ).grid(columnspan=self.columns, sticky='EW', pady=(0,8))
         self.source.set('art19')
-        tk.Radiobutton(framesource, anchor='nw', font=("Helvetica", "13"), 
-                       bd=0, pady=0, padx=0, justify=tk.LEFT, width=13,
-                       bg='#1D243A', fg='#ffffff', selectcolor='#1D243A',
-                       activebackground='#1D243A', activeforeground='#7a7e8f',
-                       text='Art19/Podcast Feed', var=self.source, value='art19'
+        tk.Radiobutton(framesource, anchor='nw', font=("Helvetica", "13"), bd=0, pady=0, padx=0, justify=tk.LEFT, width=13, bg='#1D243A', fg='#ffffff',
+                       selectcolor='#1D243A', activebackground='#1D243A', activeforeground='#7a7e8f', text='Art19/Podcast Feed', var=self.source, value='art19'
                        ).grid(row=1, column=0, sticky='NEWS')
         tk.Radiobutton(framesource, anchor='nw', font=("Helvetica", "13"), 
                        bd=0, pady=0, padx=4, justify=tk.LEFT,
@@ -145,36 +148,29 @@ class App(tk.Frame):
                        activebackground='#1D243A', activeforeground='#7a7e8f',
                        text='YouTube', var=self.source, value='yt'
                        ).grid(row=1, column=1, sticky='NEWS')
-
-        #############
-        ## SPEAKER ##
+    def drawspeaker(self):
         framespeaker = tk.Frame(self)
-        framespeaker.configure(pady=padding, bg='#1D243A')
+        framespeaker.configure(pady=self.padding, bg='#1D243A')
         framespeaker.columnconfigure(1, weight=1)
         framespeaker.pack(side=tk.TOP, fill=tk.X)
         #LabelEpisode
-        tk.Label(framespeaker, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT,
+        tk.Label(framespeaker, anchor='nw', bg='#1D243A', font=("Helvetica", "13"), bd=0, fg='#ffffff', justify=tk.LEFT,
                  text='Who are the Speakers? (separate by comma)'
                  ).grid(columnspan=3, sticky='NEWS', pady=(0,8))
         #EntryEpisode
-        tk.Entry(framespeaker, bg='#111111', font=("Helvetica", "13"),
-                 bd=0, fg='#ffffff', justify=tk.LEFT, width=40,
-                 highlightthickness=0, 
+        tk.Entry(framespeaker, bg='#111111', font=("Helvetica", "13"), bd=0, fg='#ffffff', justify=tk.LEFT, width=40, highlightthickness=0,
                  textvariable=self.speaker
                  ).grid(columnspan=2, row=1, sticky='NEWS', ipady=4)
-        tk.Label(framespeaker, bg='#1D243A', bd=0, width=12).grid(column=2, row=1, sticky='NEWS')
-
-        #############
-        ## LENGTH ##
+        tk.Label(framespeaker, bg='#1D243A', bd=0, width=12).grid(column=2, row=1, sticky='NEWS') # emulates button
+    def drawlength(self):
         framelength = tk.Frame(self)
-        framelength.configure(pady=padding, bg='#1D243A')
+        framelength.configure(pady=self.padding, bg='#1D243A')
         framelength.columnconfigure(2, weight=1)
         framelength.pack(side=tk.TOP, pady=(0,4), fill=tk.X)
         #LabelEpisode
         tk.Label(framelength, anchor='nw', bg='#1D243A', font=("Helvetica", "13"),
                  bd=0, fg='#ffffff', justify=tk.LEFT,
-                 text='Length of the Episode? (optional, first 30 are known to program)'
+                 text=f'Length of the Episode? (optional, first {CURRENT-1} are known to program)'
                  ).grid(columnspan=3, sticky='NEWS', pady=(0,8))
         #EntryEpisode
         tk.Entry(framelength, bg='#111111', font=("Helvetica", "13"),
@@ -182,42 +178,54 @@ class App(tk.Frame):
                  highlightthickness=0, 
                  textvariable=self.length
                  ).grid(column=1, row=1, sticky='NEWS', ipady=4)
-
-        ############
-        ## SUBMIT ##
-        #ButtonSubmit
+    def drawother(self):
         tk.Button(self, activebackground='#7a7e8f', activeforeground='#eaff68', bd=1, bg='#3b3f4e',
                   command=self.convert, fg='#ffffff', font=("Helvetica", "13"), padx=0, pady=0,
                   highlightcolor='#eaff68', relief=tk.RAISED, text='Convert', width=9
-                  ).pack(side=tk.RIGHT)
+                  ).pack(side=tk.RIGHT) #ButtonSubmit
         tk.Label(self, bg='#1D243A', font=("Helvetica", "13"),
                  bd=0, fg='#ffffff', padx=8, textvariable=self.error).pack(side=tk.RIGHT)
 
-    def episode_fill(self):
+    def episode_fill(self, e=None): # e is for events, makes it callable with key shortcuts (kind of a hack?)
         self.error.set('')
+        self.special.set('choose Special Episode')
         try:
-            e = int(self.episodeNr.get())
-            self.length.set(LENGTHS[int(e)])
-            self.speaker.set(', '.join(SPEAKER[int(e)]))
+            int(self.episodeNr.get())
         except:
             self.error.set('Episode Number must be Number')
-    def openfile(self):
+            return
+        try:
+            s, l = INTERNAL[str(self.episodeNr.get()).zfill(2)] # I have saved all of this information at the end of the file for convenience...
+            self.length.set(l)
+            self.speaker.set(', '.join(s))
+        except:
+            self.length.set('')
+            self.speaker.set('Eric Weinstein')
+            self.error.set('Not found, provide information manually, please')
+    def openfile(self, e=None):
         self.error.set('')
         self.path.set(filedialog.askopenfilename())
         if '/' in self.path.get():
             self.filepath, self.filename = tuple(self.path.get().rsplit('/', 1))
-            for e in reversed(EPISODES):
+            for e in EPISODES:
                 if e in self.filename or str(int(e)) in self.filename:
                     self.episodeNr.set(e)
-                    self.length.set(LENGTHS[int(e)])
-                    self.speaker.set(', '.join(SPEAKER[int(e)]))
+                    s, l = INTERNAL[str(self.episodeNr.get()).zfill(2)] # see above in episode_fill
+                    self.length.set(l)
+                    self.speaker.set(', '.join(s))
                     break
             if self.outpath.get() == 'C:/' or self.outpath.get() == '':
                 self.outpath.set(self.filepath)
-    def getsaveplace(self):
+    def getsaveplace(self, e=None):
         self.error.set('')
         self.outpath.set(filedialog.askdirectory())
-    def convert(self):
+    def external(self):
+        self.error.set('')
+        self.episodeNr.set('')
+        s, l = EXTERNAL[self.special.get()] # again, I have saved all of this, too
+        self.length.set(l)
+        self.speaker.set(', '.join(s))
+    def convert(self, e=None):
         vtt=False
         if '/' in self.path.get():
             self.filepath, self.filename = tuple(self.path.get().rsplit('/', 1))
@@ -225,7 +233,7 @@ class App(tk.Frame):
             self.error.set('Please specify a valid input path and file')
         if '00:00:00' in self.length.get():
             length = None
-        elif len(self.length.get()) < 7:
+        elif len(self.length.get()) < 4:
             length = None
         else:
             length = self.length.get()
@@ -237,31 +245,34 @@ class App(tk.Frame):
             return
         if '.vtt' in self.filename[-9:]:
             vtt = True
-        try:
-            int(self.episodeNr.get())
-        except:
-            self.error.set('Episode Number must be Number')
-            return
-        if not int(self.episodeNr.get()) >= 0:
-            self.error.set('Episode Number must be positive')
-            return
-        if not vtt and not len(self.speaker.get()) > 1:
+        if 'choose' in self.special.get():
+            try:
+                int(self.episodeNr.get())
+            except:
+                self.error.set('Episode Number must be Number')
+                return
+            if not int(self.episodeNr.get()) >= 0:
+                self.error.set('Episode Number must be positive')
+                return
+        else:
+            self.episodeNr.set('-1')
+        if not vtt and not 'Otter' in self.service.get() and not len(self.speaker.get()) > 1:
             self.error.set('No speakers were given, please write at least Eric Weinstein in')
             return
         MainProgram(self.filepath, self.filename,
                     self.episodeNr.get(), self.source.get(),
                     self.service.get(), self.speaker.get(),
-                    length, self.outpath.get())
+                    self.special.get(), length, self.outpath.get())
         self.error.set('Success!')    
 
 ####################################################################################################################################################
 ####################################################################################################################################################
 ####################################################################################################################################################
 class MainProgram():
-    def __init__(self, filepath, filename, episodeNr, source, service, speaker, length=None, output=None):
+    def __init__(self, filepath, filename, episodeNr, source, service, speaker, special, length=None, output=None):
         self.filepath, self.filename, self.source   = filepath, filename, source
         self.service, self.length, self.output      = service, length, output
-        self.speaker                                = speaker
+        self.speaker, self.special                  = speaker, special
 
         try:
             self.episodeNr = int(episodeNr) # I checked above, but you never know...
@@ -270,17 +281,22 @@ class MainProgram():
             
         if self.output is None or self.output == '':
             self.output = self.filepath
-            
+
+        if self.episodeNr == -1:
+            self.filename = '_'.join(self.special.split(' '))
         if self.episodeNr <= CURRENT and self.episodeNr > 0: # fill everything out if it's in the archives
-            if len(speaker) < len(SPEAKER[self.episodeNr]): # not '<=' to give custom names and abbreviations a chance
-                self.speaker = SPEAKER[self.episodeNr]
-            self.length = LENGTHS[self.episodeNr]
+            speakers, length = INTERNAL[str(self.episodeNr).zfill(2)] # I have saved all of this information at the end of the file for convenience...
+            if len(speaker) < len(speakers): # not '<=' to give custom names and abbreviations a chance
+                self.speaker = speakers
+            self.length = length
+        if self.length is None:
+            self.length = '09:00:00' # emergency value, I would have to guess either way
 
         with open('/'.join((filepath, filename)), 'r') as file:
             rawlines = [line for line in file]
         rawtext = ''.join(rawlines)
         rawlines= []
-                
+        
         tokens = []
         if('vtt' in filename.rsplit('.', 1)):
             tokens = self.parse_vtt(rawtext)
@@ -317,7 +333,7 @@ class MainProgram():
                     content = ''.join((content, line.strip()))
             if note: # it's a comment/NOTE
                 if not 'www.descript.com' in content:
-                    tokens.append(list((1, '', '', content))) # 0 means NOTE, will be decoded in the save_as_vtte method
+                    tokens.append(list((1, '', '', content))) # 1 means NOTE
             else: # not a NOTE, actual cue
                 if '<v' in content[:3]: # already tagged
                     content = content.strip()
@@ -326,7 +342,7 @@ class MainProgram():
                 else: # old format
                     if ':' in content[:32]:
                         currentspeaker, content = tuple(content.split(': ', 1))
-                for S in SPEAKER[self.episodeNr]:
+                for S in self.speaker:
                     if currentspeaker in S:
                         currentspeaker = S
                 tokens.append(list((0, currentspeaker, time, content)))
@@ -392,20 +408,13 @@ class MainProgram():
             newtokens.append(    [0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', token[2], '.000')), prevtoken[3]])
             prevtoken = token
         # there is now only the last token left, that's where the LENGTH of the episode comes into play
-        try: # I saved most episode lengths in a list below
-            newtokens.append(    [0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', LENGTHS[self.episodeNr], '.000')), prevtoken[3]])
-        except: # default
-            try:
-                newtokens.append([0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', self.length, '.000')), prevtoken[3]])
-            except:
-                newtokens.append([0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', '9:00:00', '.000')), prevtoken[3]])
+        newtokens.append([0, prevtoken[1], ''.join((prevtoken[2], '.000', ' --> ', self.length, '.000')), prevtoken[3]])
         return newtokens
     
     ######################################################################################################################################################
-
     ## vtt file, specification-compliant
     def save_as_vtt(self, tokens):
-        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr != 0 else self.filename
+        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr > 0 else self.filename
         filename = ''.join((filename, '_', self.source.lower())) if self.source is not None else filename
         if self.filename[:-4] == filename:
             ''.join((filename, '(1)'))
@@ -419,7 +428,7 @@ class MainProgram():
                 
     ## srt file, specification-compliant
     def save_as_srt(self, tokens):
-        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr != 0 else self.filename
+        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr > 0 else self.filename
         filename = ''.join((filename, '_', self.source.lower())) if self.source is not None else filename
         if self.filename[:-4] == filename:
             ''.join((filename, '(1)'))
@@ -437,7 +446,7 @@ class MainProgram():
 
     ## wiki markup
     def save_as_wiki(self, tokens):
-        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr != 0 else self.filename
+        filename = ''.join(('Ep_', str(self.episodeNr))) if self.episodeNr > 0 else self.filename
         with open(''.join((self.output, '/', filename, '_wiki.txt')), 'w') as file:
             currentspeaker = ''
             for token in tokens:
@@ -455,78 +464,61 @@ class MainProgram():
                 file.write(f'<span title=\"{time}\">{token[3]}</span>')
                 
 ###############################################################################################################################################################################################
-## all episode lengths up to EP30
-CURRENT = 30
-EPISODES= [str(e).zfill(2) for e in range(0,CURRENT+1)]; EPISODES.pop(19)
-LENGTHS = ['0:01:34', #0
-	'02:52:35', 
-	'00:28:33', 
-	'01:21:31', 
-	'02:45:48', 
-	'01:51:21', 
-	'02:01:59', 
-	'02:01:16', 
-	'01:08:49', 
-	'02:19:36', 
-	'01:43:27', #10
-	'02:38:59', 
-	'01:35:46', 
-	'01:38:20', 
-	'01:06:39', 
-	'01:50:54', 
-	'02:18:17', 
-	'02:20:04', 
-	'01:07:58', 
-	'02:18:33', 
-	'02:23:04', #20
-	'01:52:50', 
-	'01:10:39', 
-	'02:11:03', 
-	'01:55:20', 
-	'01:09:33', 
-	'02:29:56', 
-	'03:38:06', 
-	'02:05:43', 
-	'02:03:49', 
-	'02:37:03'  #30
-	]
-SPEAKER = [['Eric Weinstein'], #0
-           ['Eric Weinstein', 'Peter Thiel'],
-           ['Eric Weinstein'],
-           ['Eric Weinstein', 'Werner Herzog'],
-           ['Eric Weinstein', 'Timur Kuran'],
-           ['Eric Weinstein', 'Rabbi Wolpe'],
-           ['Eric Weinstein', 'Jocko Willink'],
-           ['Eric Weinstein', 'Bret Easton Ellis'],
-           ['Eric Weinstein', 'Andrew Yang'],
-           ['Eric Weinstein', 'Bryan Callen'],
-           ['Eric Weinstein', 'Julie Lindendahl'], #10
-           ['Eric Weinstein', 'Sam Harris'],
-           ['Eric Weinstein', 'Vitalik Buterin'],
-           ['Eric Weinstein', 'Garry Gasparov'],
-           ['Eric Weinstein', 'London Tsai'],
-           ['Eric Weinstein', 'Garrett Lisi'],
-           ['Eric Weinstein', 'Tyler Cowen'],
-           ['Eric Weinstein', 'Anna Khachiyan'],
-           ['Eric Weinstein'],
-           ['Eric Weinstein', 'Bret Weinstein'],
-           ['Eric Weinstein', 'Sir Roger Penrose'], #20
-           ['Eric Weinstein', 'Ashley Mathews'],
-           ['Eric Weinstein', 'Ben Greenfield'],
-           ['Eric Weinstein', 'Agnes Collard'],
-           ['Eric Weinstein', 'Kai Lenny'],
-           ['Eric Weinstein'],
-           ['Eric Weinstein', 'James O\'Keefe'],
-           ['Eric Weinstein', 'Daniel Schmachtenberger'],
-           ['Eric Weinstein', 'Eric Lewis'],
-           ['Eric Weinstein', 'Jamie Metzl'],
-           ['Eric Weinstein', 'Ross Douthat'] #30
-           ]
+## all episode inforamtion up to EP30
+EXTERNAL = {'Geometric Unity':      (['Eric Weinstein'],                                                    '02:48:23'),
+            'JRE #1022':            (['Eric Weinstein', 'Joe Rogan'],                                       '02:41:08'),
+            'JRE #1203':            (['Eric Weinstein', 'Joe Rogan'],                                       '03:51:47'),
+            'JRE #1320':            (['Eric Weinstein', 'Joe Rogan'],                                       '03:28:12'),
+            'JRE #1453':            (['Eric Weinstein', 'Joe Rogan'],                                       '03:02:06'),
+            'Lex Round 1':          (['Eric Weinstein', 'Lex Friedman'],                                    '01:21:56'),
+            'Lex Round 2':          (['Eric Weinstein', 'Lex Friedman'],                                    '02:46:36'),
+            'Rubin 2017':           (['Eric Weinstein', 'Dave Rubin'],                                      '01:40:25'),
+            'Rubin 2018':           (['Eric Weinstein', 'Dave Rubin'],                                      '02:05:58'),
+            'Rubin with Peterson':  (['Eric Weinstein', 'Dave Rubin', 'Jordan Peterson'],                   '02:11:44'),
+            'Rubin with Shapiro':   (['Eric Weinstein', 'Dave Rubin', 'Jordan Peterson', 'Ben Shapiro'],    '00:56:33'),
+            'Rubin with Bret':      (['Eric Weinstein', 'Dave Rubin', 'Bret Weinstein'],                    '02:47:44'),
+            'Tim Ferriss 2016':     (['Eric Weinstein', 'Tim Ferriss'],                                     '01:40:25')
+            }
+INTERNAL = {'00': (['Eric Weinstein'],                              '00:01:34'),
+            '01': (['Eric Weinstein', 'Peter Thiel'],               '02:52:35'),
+            '02': (['Eric Weinstein'],                              '00:28:33'),
+            '03': (['Eric Weinstein', 'Werner Herzog'],             '01:21:31'),
+            '04': (['Eric Weinstein', 'Timur Kuran'],               '02:45:48'),
+            '05': (['Eric Weinstein', 'Rabbi Wolpe'],               '01:51:21'),
+            '06': (['Eric Weinstein', 'Jocko Willink'],             '02:01:59'),
+            '07': (['Eric Weinstein', 'Bret Easton Ellis'],         '02:01:16'),
+            '08': (['Eric Weinstein', 'Andrew Yang'],               '01:08:49'),
+            '09': (['Eric Weinstein', 'Bryan Callen'],              '02:19:36'),
+            '10': (['Eric Weinstein', 'Julie Lindendahl'],          '01:43:27'),
+            '11': (['Eric Weinstein', 'Sam Harris'],                '02:38:59'),
+            '12': (['Eric Weinstein', 'Vitalik Buterin'],           '01:35:46'),
+            '13': (['Eric Weinstein', 'Garry Gasparov'],            '01:38:20'),
+            '14': (['Eric Weinstein', 'London Tsai'],               '01:06:39'),
+            '15': (['Eric Weinstein', 'Garrett Lisi'],              '01:50:54'),
+            '16': (['Eric Weinstein', 'Tyler Cowen'],               '02:18:17'),
+            '17': (['Eric Weinstein', 'Anna Khachiyan'],            '02:20:04'),
+            '18': (['Eric Weinstein'],                              '01:07:58'),
+            '19': (['Eric Weinstein', 'Bret Weinstein'],            '02:18:33'),
+            '20': (['Eric Weinstein', 'Sir Roger Penrose'],         '02:23:04'),
+            '21': (['Eric Weinstein', 'Ashley Mathews'],            '01:52:50'),
+            '22': (['Eric Weinstein', 'Ben Greenfield'],            '01:10:39'),
+            '23': (['Eric Weinstein', 'Agnes Collard'],             '02:11:03'),
+            '24': (['Eric Weinstein', 'Kai Lenny'],                 '01:55:20'),
+            '25': (['Eric Weinstein'],                              '01:09:33'),
+            '26': (['Eric Weinstein', "James O'Keefe"],             '02:29:56'),
+            '27': (['Eric Weinstein', 'Daniel Schmachtenberger'],   '03:38:06'),
+            '28': (['Eric Weinstein', 'Eric Lewis'],                '02:05:43'),
+            '29': (['Eric Weinstein', 'Jamie Metzl'],               '02:03:49'),
+            '30': (['Eric Weinstein', 'Ross Douthat'],              '02:37:03')
+            }
+EPISODES = sorted(INTERNAL.keys())
+EPISODES.pop(19) # otherwise it would 'find' all art19 sourced episodes as episode 19...
+EPISODES.reverse() # otherwise it would find '1' before '11' and so on
+CURRENT = len(INTERNAL)
 
 def main():
     root = Root()
-    app = App(root)
-    app.mainloop()
+    root.mainloop()
 
 if __name__ == '__main__':
     main()
