@@ -509,7 +509,9 @@ INTERNAL = {'00': (['Eric Weinstein'],                              '00:01:34'),
             '27': (['Eric Weinstein', 'Daniel Schmachtenberger'],   '03:38:06'),
             '28': (['Eric Weinstein', 'Eric Lewis'],                '02:05:43'),
             '29': (['Eric Weinstein', 'Jamie Metzl'],               '02:03:49'),
-            '30': (['Eric Weinstein', 'Ross Douthat'],              '02:37:03')
+            '30': (['Eric Weinstein', 'Ross Douthat'],              '02:37:03'),
+            '31': (['Eric Weinstein', 'Ryan Holiday'],              '02:26:59'),
+            '32': (['Eric Weinstein', 'J. D. Vance'],               '02:18:08')
             }
 EPISODES = sorted(INTERNAL.keys())
 EPISODES.pop(19) # otherwise it would 'find' all art19 sourced episodes as episode 19...
